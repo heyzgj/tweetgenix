@@ -1,26 +1,41 @@
-import { config } from 'dotenv';
+// src/utils/gemini.ts
+import { config } from "dotenv";
 
-config(); // Load environment variables from .env.local
+config(); // 从 .env.local 加载环境变量
 
-export async function callGeminiAPI(prompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY; // 从环境变量中获取 API 密钥
+export async function callGeminiAPI(
+  prompt: string,
+  length: string
+): Promise<ReadableStream<Uint8Array>> {
+  const apiKey = process.env.GEMINI_API_KEY;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{ text: prompt }]
-      }]
-    }),
-  });
+  // 注意：使用 Gemini 的流式接口 streamGenerateContent，不再传入 "stream" 字段
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: length === "short" ? 50 : length === "medium" ? 100 : 200,
+        },
+      }),
+    }
+  );
 
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    const errText = await response.text();
+    throw new Error(`Network response was not ok: ${response.status} ${errText}`);
   }
 
-  const data = await response.json();
-  return data.candidates[0].content.parts[0].text; // 提取生成的推文内容
-} 
+  if (!response.body) {
+    throw new Error("Response body is null");
+  }
+
+  return response.body;
+}
