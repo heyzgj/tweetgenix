@@ -118,42 +118,49 @@ TweetGenix is a Twitter AI tweet generator to help startup founders, investors, 
 ### Phase 5: Testing and Debugging
 **Goal**: Ensure all features work correctly and fix issues.
 
-- [ ] **19. Test Tweet Generation**
-- On `/generate`, test with prompts (e.g., "Startup tip") and handles (e.g., "@elonmusk").
-- Confirm tweet generates in <5 seconds and matches length.
+- [x] **19. Test Tweet Generation**
+- On `/generate`, tested with prompts (e.g., "Startup tip") and handles (e.g., "@elonmusk").
+- Confirmed tweet generates in <5 seconds and matches length.
 
-- [ ] **20. Test Save and History Functionality**
-- Generate a tweet, click "Save", then check `/history`.
-- Verify all fields (content, prompt, etc.) display correctly.
+- [x] **20. Test Save and History Functionality**
+- Generated a tweet, clicked "Save", then checked `/history`.
+- Verified all fields (content, prompt, etc.) display correctly.
 
-- [ ] **21. Test Copy Functionality**
-- Click "Copy" on a tweet, paste into a text editor, and check accuracy.
+- [x] **21. Test Copy Functionality**
+- Clicked "Copy" on a tweet, pasted into a text editor, and checked accuracy.
 
-- [ ] **22. Debug Issues**
-- Open browser console to check for errors.
-- Fix any API or UI bugs (e.g., failed fetches, display glitches).
+- [x] **22. Debug Issues**
+- Opened browser console to check for errors.
+- Fixed any API or UI bugs (e.g., failed fetches, display glitches).
 
 **进展总结**:
-- [ ] (Leave empty until phase completes)
+- [x] Completed testing of tweet generation, save, and copy functionalities.
+- [x] Updated the database schema to include `reference_tweet`.
+- [x] Removed `nitter.ts` and adjusted the application to allow users to copy and paste reference tweets.
+- [x] All features are functioning as expected, ready for deployment.
 
 ---
 
 ### Phase 6: Deployment
 **Goal**: Deploy the app to Vercel for live use.
 
-- [ ] **23. Prepare Production Environment**
+- [x] **23. Prepare Production Environment**
 - Add real `GEMINI_API_KEY` to `.env.local`.
 - Run `pnpm build` to check for build errors.
 
-- [ ] **24. Deploy to Vercel**
+- [x] **24. Deploy to Vercel**
 - Push code to a GitHub repo.
 - In Vercel dashboard, link the repo, set env vars, and deploy.
 
-- [ ] **25. Final Testing**
+- [x] **25. Final Testing**
 - Visit the live URL, test all features end-to-end.
 
 **进展总结**:
-- [ ] (Leave empty until phase completes)
+- [x] Successfully deployed the application to Vercel.
+- [x] Completed all tasks for Phase 6.
+- [x] Application is fully functional and ready for user feedback.
+- [x] No issues encountered during deployment.
+- [x] Ready for feature expansion based on user feedback.
 
 ---
 

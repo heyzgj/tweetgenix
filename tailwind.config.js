@@ -1,9 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-      "./app/**/*.{js,ts,jsx,tsx}", // App Router 路径
-      "./components/**/*.{js,ts,jsx,tsx}", // 组件路径
-      "./pages/**/*.{js,ts,jsx,tsx}", // Pages Router（可选）
+      "./src/app/**/*.{js,ts,jsx,tsx}", // App Router 路径
+      "./src/components/**/*.{js,ts,jsx,tsx}", // 组件路径
+      "./src/styles/**/*.{css}",
+      "./src/lib/* {js,ts,jsx,tsx}",
+      
     ],
     theme: {
       extend: {

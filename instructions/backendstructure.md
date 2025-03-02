@@ -10,16 +10,16 @@ created_at: TIMESTAMP (when the tweet was made)
 
 prompt: TEXT (what the user typed in, optional)
 
-reference_handle: TEXT (the Twitter handle used, optional)
+reference_tweet: TEXT (the Twitter tweets used, optional)
 
 length: VARCHAR (stores "short," "medium," or "long")
 
 For now, since we’re not doing user logins in the first version, all tweets go into this one table, and everyone sees the same history. Later, we can add Supabase Auth to give each user their own private list.
 API Routes (Next.js)
 The app talks to the backend through these routes:
-POST /api/generate: This makes the tweet. It takes the user’s idea, reference handle, and length, grabs five tweets from Nitter, sends everything to Gemini 2.0 Flash, and sends back the new tweet.
+POST /api/generate: This makes the tweet. It takes the user’s idea, reference tweet, and length, sends everything to Gemini 2.0 Flash, and sends back the new tweet.
 
-POST /api/save: This saves a tweet to Supabase, taking the tweet text, prompt, reference handle, and length, and adding them to the tweets table.
+POST /api/save: This saves a tweet to Supabase, taking the tweet text, prompt, reference tweet, and length, and adding them to the tweets table.
 
 GET /api/history: This pulls all the saved tweets from Supabase and sends them to the frontend to show in the history page.
 

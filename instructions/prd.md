@@ -8,11 +8,10 @@ Twitter AI 生成推文 Web 应用 - PRD（产品需求文档）
 2. User Flow
 用户访问Web应用，在界面上输入：
 一个生成提示（例如“分享一个创业小技巧”）。
-一个参考Twitter账号的handle（例如“
-@elonmusk
+一个参考Twitter推文（例如“
+@elonmusk的推文直接复制过来作为参考
 ”）。
 选择推文字数范围（短、中、长）。
-系统通过Nitter抓取参考账号的前5条公开推文，分析其风格。
 使用Gemini 2.0 Flash生成一条推文，展示给用户。
 用户查看生成的推文，可直接编辑文本。
 用户选择：
@@ -23,13 +22,12 @@ Twitter AI 生成推文 Web 应用 - PRD（产品需求文档）
 前端+后端：Next.js（v15.x），使用App Router和Server Components。
 UI：shadcn/ui（基于Tailwind v4），极简设计。
 AI：Gemini 2.0 Flash（通过Google AI SDK，参考https://ai.google.dev/gemini-api/docs）。
-Twitter数据抓取：Nitter（抓取参考账号前5条推文，无需API密钥）。
 数据库：Supabase（免费层，用于存储推文历史）。
 部署：Vercel（免费层）。
 4. Core Features
 推文生成：
-用户输入生成提示和参考Twitter账号handle。
-系统基于参考账号的前5条推文风格，使用Gemini 2.0 Flash生成1条推文。
+用户输入生成提示和参考Twitter tweets。
+系统基于参考推文风格，使用Gemini 2.0 Flash生成1条推文。
 默认风格为casual（类似startup founder的轻松、接地气口吻，避免AI感）。
 支持用户选择字数范围：
 短：50-100字符
@@ -59,7 +57,6 @@ Out-of-scope（MVP不包含的功能）：
 预算：全程使用免费技术栈：
 Gemini 2.0 Flash（免费额度，每天100次请求）。
 Vercel和Supabase的免费层。
-Nitter替代Twitter API。
 伦理：无需考虑AI生成内容的伦理问题。
 7. Constraints & Assumptions
 Constraints（限制条件）：
@@ -68,15 +65,11 @@ Vercel免费层有带宽和执行时间限制。
 无法直接发布推文，依赖用户手动粘贴。
 Assumptions（假设）：
 用户愿意手动复制粘贴到Twitter。
-Nitter能稳定抓取参考账号的公开推文。
 Gemini 2.0 Flash的免费额度足够支持MVP初期使用。
 8. Known Issues & Potential Pitfalls
 Gemini免费额度不足：
 问题：每日100次请求可能不够多用户使用。
 缓解：限制每日生成次数（例如50次/天），超出时提示用户。
-Nitter抓取不稳定：
-问题：Nitter可能因Twitter限制而失效。
-缓解：备选方案使用twitter-scraper（无需API密钥）。
 手动发布不便：
 问题：用户可能觉得复制粘贴麻烦。
 缓解：界面提供清晰的“复制成功”提示，确保操作简单。

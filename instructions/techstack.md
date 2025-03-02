@@ -6,8 +6,6 @@ shadcn/ui: This is how we’re building the interface. It’s a set of ready-mad
 
 Gemini 2.0 Flash: This AI model powers our tweet generation. We connect to it through the Google AI SDK, feeding it prompts and reference styles to create tweets. The full guide is available here: Gemini API Documentation.
 
-Nitter: We use this open-source tool to pull tweets from reference accounts without needing a Twitter API key. It’s a service, not a package, so there’s no version number, but you can explore how it works on GitHub: Nitter GitHub.
-
 Supabase: This is our backend service, giving us a PostgreSQL database to save tweet history. We connect to it with the Supabase JavaScript client. Everything you need to know is here: Supabase Documentation.
 
 We’ve also got some extra pieces to make it all work:
