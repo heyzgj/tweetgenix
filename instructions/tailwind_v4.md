@@ -1,82 +1,229 @@
-# 使用 Tailwind CSS v4 的指南
+# Tailwind CSS v4 使用指南
 
-## 介绍
-Tailwind CSS v4 是一个现代的 CSS 框架，旨在提高开发效率和性能。此版本引入了 CSS-first 配置，简化了样式的使用和管理。
+## 简介
 
-## 安装
-在项目中使用 Tailwind CSS v4，首先需要安装相关依赖。使用以下命令：
+Tailwind CSS 是一个实用优先的 CSS 框架，可以帮助您快速构建现代网站，而无需离开 HTML。在 TweetGenix 项目中，我们使用 Tailwind CSS v4 来构建用户界面，并结合自定义设计令牌系统，确保整个应用程序的视觉一致性。
 
-```bash
-npm install tailwindcss@latest postcss
-```
+## 设计令牌系统
 
-## 配置
-### 1. 创建 CSS 文件
-在 `src/styles` 目录中创建一个新的 CSS 文件，例如 `styles.css`。
+我们的设计系统基于明确定义的设计令牌，这些令牌在 `globals.css` 中定义，并通过 Tailwind CSS 的原子类或我们的组件复合类使用。
 
-### 2. 引入 Tailwind
-在 `styles.css` 文件中，添加以下内容以引入 Tailwind：
+### 核心设计令牌
 
 ```css
-@import "tailwindcss";
-
-@theme {
-  --font-sans: "Inter", sans-serif;
-  --color-primary: oklch(0.72 0.19 244.08);
-  /* 添加其他主题变量 */
+:root {
+  /* 颜色 */
+  --background: 0 0% 100%;        /* 页面背景色 */
+  --foreground: 200 15% 15%;      /* 主要文本颜色 */
+  --primary: 204 88% 53%;         /* X 蓝色 #1d9bf0 */
+  --primary-hover: 204 88% 43%;   /* 深蓝色，用于悬停 */
+  --secondary: 204 88% 96%;       /* 淡蓝色，用于次要元素 */
+  --muted: 220 14% 96%;           /* 减弱的背景色 */
+  --muted-foreground: 220 8% 46%; /* 减弱的文本颜色 */
+  --border: 220 13% 90%;          /* 边框颜色 */
+  
+  /* 圆角 */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+  
+  /* 阴影 */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* 间距 */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  /* ... 更多间距变量 ... */
+  
+  /* 过渡 */
+  --transition-normal: 0.2s ease;
 }
 ```
 
-### 3. 更新 Next.js 配置
-在 `next.config.js` 文件中，添加以下配置以启用 Tailwind CSS v4：
+### 使用设计令牌
 
-```javascript
-module.exports = {
-  experimental: {
-    tailwindcss: {
-      version: '4.0'
-    }
-  }
+在 Tailwind 中使用设计令牌有两种主要方式：
+
+1. **直接在原子类中使用**:
+
+```jsx
+<button className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]">
+  Click me
+</button>
+```
+
+2. **通过组件复合类使用**:
+
+```jsx
+<button className="btn-primary">
+  Click me
+</button>
+```
+
+## 组件复合类
+
+我们创建了许多复合类来封装常见的样式组合，确保一致性并提高开发效率。
+
+### 按钮
+
+```css
+.btn-primary {
+  @apply bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] 
+         rounded-[var(--radius-full)] px-4 py-2 font-medium transition-colors 
+         hover:bg-[hsl(var(--primary-hover))] disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-transparent text-[hsl(var(--primary))] border border-[hsl(var(--border))] 
+         rounded-[var(--radius-full)] px-4 py-2 font-medium transition-colors 
+         hover:bg-[hsl(var(--secondary))] disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-ghost {
+  @apply bg-transparent text-[hsl(var(--foreground))] rounded-[var(--radius-full)] 
+         px-4 py-2 font-medium transition-colors hover:bg-[hsl(var(--muted))] 
+         disabled:opacity-50 disabled:cursor-not-allowed;
 }
 ```
 
-## 使用 Tailwind CSS
-### 1. 在组件中使用
-在您的 React 组件中，您可以直接使用 Tailwind 的类名。例如：
+### 输入框
 
-```javascript
-<div className="bg-primary p-4 rounded-lg hover:scale-105 transition-transform">
-  <h1 className="text-3xl font-bold">欢迎使用 Tailwind CSS v4</h1>
+```css
+.input-standard {
+  @apply w-full rounded-[var(--radius-md)] border border-[hsl(var(--border))] 
+         bg-transparent px-3 py-1 text-[hsl(var(--foreground))] 
+         focus:outline-none focus:border-[hsl(var(--primary))] 
+         focus:ring-2 focus:ring-[hsl(var(--primary)/20%)] transition-colors 
+         disabled:opacity-50 disabled:cursor-not-allowed;
+}
+```
+
+### 卡片
+
+```css
+.card-standard {
+  @apply bg-[hsl(var(--card))] text-[hsl(var(--card-foreground))] 
+         rounded-[var(--radius-lg)] border border-[hsl(var(--border))] 
+         shadow-[var(--shadow-sm)] overflow-hidden;
+}
+```
+
+## 样式使用规范
+
+### 1. 优先使用设计令牌
+
+**✅ 推荐**: 使用设计令牌变量
+
+```tsx
+<div className="text-[hsl(var(--foreground))] bg-[hsl(var(--background))]">
+  Hello World
 </div>
 ```
 
-### 2. 动态实用程序值
-Tailwind v4 支持动态实用程序值，您可以根据需要灵活使用。
+**❌ 避免**: 直接使用颜色代码
+
+```tsx
+<div className="text-[#0f1419] bg-white">
+  Hello World
+</div>
+```
+
+### 2. 优先使用组件复合类
+
+**✅ 推荐**: 使用预定义的组件类
+
+```tsx
+<button className="btn-primary">
+  提交
+</button>
+```
+
+**❌ 避免**: 重复编写相同的样式组合
+
+```tsx
+<button className="bg-[hsl(var(--primary))] text-white rounded-full px-4 py-2 hover:bg-blue-600">
+  提交
+</button>
+```
 
 ### 3. 响应式设计
-使用 Tailwind 的响应式设计功能，您可以轻松地为不同屏幕尺寸应用样式。例如：
 
-```javascript
-<div className="text-base md:text-lg lg:text-xl">
-  这是一个响应式文本
+使用 Tailwind 的响应式前缀来适应不同屏幕尺寸：
+
+```tsx
+<div className="flex flex-col md:flex-row gap-4">
+  {/* 在移动端是垂直排列，在中等尺寸及以上是水平排列 */}
 </div>
 ```
 
-## 与 Tailwind v3 的不同
-- **CSS-first 配置**: v4 允许您在 CSS 文件中直接配置，而不再需要 `tailwind.config.js` 文件。
-- **性能优化**: v4 提供了更快的构建时间和更小的包大小。
-- **动态实用程序**: v4 引入了更多动态实用程序值，简化了样式的应用。
+### 4. 状态变体
 
-## 常见问题
-### 1. 如何处理颜色和主题？
-您可以在 `@theme` 中定义颜色变量，并在组件中使用这些变量。
+利用 Tailwind 的状态变体来设计交互状态：
 
-### 2. 如何确保样式生效？
-确保在项目的入口文件中引入了 `styles.css`，并检查浏览器的开发者工具以确认样式是否应用。
+```tsx
+<button className="btn-primary hover:bg-[hsl(var(--primary-hover))] focus:ring-2 focus:ring-[hsl(var(--primary)/50%)]">
+  Hover and Focus
+</button>
+```
 
-## 参考资料
-- [Tailwind CSS v4.0 Quick Guide](https://dev.to/utkarshthedev/tailwind-css-v40-quick-guide-2bh5)
-- [Tailwind CSS v4 Documentation](https://tailwindcss.com/blog/tailwindcss-v4)
+## 最佳实践
 
-## 结论
-Tailwind CSS v4 提供了强大的功能和灵活性，使得开发现代网页变得更加高效。通过遵循本指南，您可以在项目中顺利集成和使用 Tailwind CSS v4。
+1. **组件抽象**：对于重复使用的 UI 模式，创建 React 组件而不是复制粘贴样式类。
+
+2. **避免内联样式**：使用 Tailwind 类或自定义 CSS 类，避免使用内联样式。
+
+3. **使用语义化类名**：当创建自定义组件时，使用描述组件用途而非其外观的类名。
+
+4. **组织类名顺序**：建议按照以下顺序组织类名：
+   - 布局类 (display, position)
+   - 尺寸类 (width, height)
+   - 间距类 (margin, padding)
+   - 边框类 (border, rounded)
+   - 颜色类 (text, bg)
+   - 其他样式 (shadow, opacity)
+   - 状态变体 (hover, focus)
+
+5. **在需要时使用 `@apply`**：如果一组样式被频繁重用，考虑创建一个组件类。
+
+## 排错指南
+
+### 1. 样式未应用
+
+如果样式未正确应用，请检查：
+- 类名是否拼写正确
+- CSS 变量是否在正确的范围内定义
+- 是否有高优先级样式覆盖了您的样式
+
+### 2. HSL 颜色使用
+
+使用 HSL 颜色变量时，确保正确使用 `hsl()` 函数：
+
+```tsx
+// 正确
+<div className="bg-[hsl(var(--primary))]"></div>
+
+// 错误
+<div className="bg-[var(--primary)]"></div>
+```
+
+### 3. 自定义值
+
+对于 Tailwind 配置中没有的值，可以使用方括号语法：
+
+```tsx
+<div className="w-[342px] h-[calc(100vh-80px)]"></div>
+```
+
+## 样式重构
+
+在进行样式更改时：
+
+1. 先检查是否有设计令牌可以使用
+2. 然后检查是否有组件复合类可以使用
+3. 如果以上都不适用，使用 Tailwind 原子类
+4. 仅在必要时创建新的自定义样式
+
+通过遵循这些指南，我们可以保持代码库的一致性，提高开发效率，并确保用户界面在整个应用程序中保持一致的外观和感觉。

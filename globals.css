@@ -1,51 +1,114 @@
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 body {
   font-family: 'Chirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    /* X.com light theme colors */
+    --background: 0 0% 100%;
+    --foreground: 200 15% 15%;
 
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 15% 15%;
 
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 15% 15%;
 
-    --primary: 204 88% 53%;
+    --primary: 204 88% 53%;    /* X blue */
+    --primary-hover: 204 88% 43%;  /* 深一点的X蓝，用于悬停效果 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 204 88% 96%;  /* Light blue for hover states */
+    --secondary-foreground: 204 88% 53%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 14% 96%;      /* 用于淡色背景 */
+    --muted-foreground: 220 8% 46%;  /* 用于次要文本 */
 
-    --accent: 0 0% 15%;
+    --accent: 24 100% 50%;     /* For notifications/alerts */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 84% 60%;  /* For delete actions */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --border: 220 13% 90%;     /* 对应 #eff3f4 */
+    --input: 220 13% 90%;
     --ring: 204 88% 53%;
 
-    --radius: 1rem;
+    /* 圆角变量 */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;      /* 通用圆角 */
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;    /* 完全圆角，用于按钮等 */
+
+    /* 阴影变量 */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* 间距变量 */
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+    
+    /* 过渡效果 */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s ease;
+  }
+}
+
+/* 组件复合类 */
+@layer components {
+  /* 按钮样式 */
+  .btn-primary {
+    @apply bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-[var(--radius-full)] px-4 py-2 font-medium transition-colors hover:bg-[hsl(var(--primary-hover))] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent text-[hsl(var(--primary))] border border-[hsl(var(--border))] rounded-[var(--radius-full)] px-4 py-2 font-medium transition-colors hover:bg-[hsl(var(--secondary))] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-ghost {
+    @apply bg-transparent text-[hsl(var(--foreground))] rounded-[var(--radius-full)] px-4 py-2 font-medium transition-colors hover:bg-[hsl(var(--muted))] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* 输入框样式 */
+  .input-standard {
+    @apply w-full rounded-[var(--radius-md)] border border-[hsl(var(--border))] bg-transparent px-3 py-1 text-[hsl(var(--foreground))] focus:outline-none focus:border-[hsl(var(--primary))] focus:ring-2 focus:ring-[hsl(var(--primary)/20%)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* 卡片样式 */
+  .card-standard {
+    @apply bg-[hsl(var(--card))] text-[hsl(var(--card-foreground))] rounded-[var(--radius-lg)] border border-[hsl(var(--border))] shadow-[var(--shadow-sm)] overflow-hidden;
+  }
+  
+  /* 推文卡片样式 */
+  .tweet-card {
+    @apply bg-[hsl(var(--card))] rounded-lg sm:rounded-xl md:rounded-2xl border border-[hsl(var(--border))] p-2.5 sm:p-3 md:p-4 mb-2 sm:mb-2.5 md:mb-3 transition-colors duration-200 hover:bg-[hsl(var(--muted))];
+    box-shadow: var(--shadow-xs);
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
 /* Custom styles for matching X.com's appearance */
 .hover-effect {
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-normal);
 }
 
 .hover-effect:hover {
@@ -59,13 +122,13 @@ button, textarea, input {
 
 /* For displaying interactive like/retweet/etc buttons similar to X.com */
 .tweet-action-btn {
-  transition: all 0.2s;
-  border-radius: 9999px;
+  transition: all var(--transition-normal);
+  border-radius: var(--radius-full);
 }
 
 .tweet-action-btn:hover {
-  background-color: rgba(29, 161, 242, 0.1);
-  color: rgb(29, 161, 242);
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--primary));
 }
 
 .tweet-action-btn.like:hover {
@@ -76,4 +139,274 @@ button, textarea, input {
 .tweet-action-btn.retweet:hover {
   background-color: rgba(23, 191, 99, 0.1);
   color: rgb(23, 191, 99);
+}
+
+/* Real Tweet styles */
+.tweet-header {
+  @apply flex items-start gap-2 sm:gap-2.5 md:gap-3 mb-1.5 sm:mb-2;
+}
+
+.tweet-avatar {
+  @apply w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0;
+}
+
+.tweet-user-info {
+  @apply flex items-center flex-wrap gap-1 sm:gap-1.5;
+}
+
+.tweet-fullname {
+  @apply text-sm sm:text-base font-bold;
+}
+
+.tweet-username {
+  @apply text-xs sm:text-sm text-[hsl(var(--muted-foreground))];
+}
+
+.tweet-dot-separator {
+  @apply text-xs sm:text-sm text-[hsl(var(--muted-foreground))] mx-0.5 sm:mx-1;
+}
+
+.tweet-timestamp {
+  @apply text-xs sm:text-sm text-[hsl(var(--muted-foreground))];
+}
+
+/* Tweet content with hover-to-copy functionality */
+.tweet-content-container {
+  @apply relative;
+}
+
+.tweet-content {
+  @apply text-xs sm:text-sm md:text-base text-[hsl(var(--foreground))] leading-normal mt-0.5 sm:mt-1 mb-1.5 sm:mb-2 md:mb-3 break-words whitespace-pre-wrap cursor-pointer transition-colors duration-200 rounded-md sm:rounded-lg p-1.5 sm:p-2;
+  will-change: background-color;
+}
+
+.tweet-content:hover {
+  @apply bg-[hsl(var(--muted))];
+}
+
+.copy-indicator {
+  @apply absolute right-1 sm:right-1.5 md:right-2 top-1 sm:top-1.5 md:top-2 opacity-0 bg-[hsl(var(--muted))] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm text-[hsl(var(--muted-foreground))] transition-opacity duration-200 pointer-events-none;
+  will-change: opacity;
+}
+
+.tweet-content:hover + .copy-indicator {
+  @apply opacity-100;
+}
+
+.copy-indicator.copied {
+  @apply opacity-100 bg-[hsl(var(--secondary))] text-[hsl(var(--primary))];
+}
+
+/* Tweet actions */
+.tweet-actions {
+  @apply flex items-center justify-between mt-2 sm:mt-2.5 md:mt-3 px-1 sm:px-1.5;
+}
+
+.tweet-action-btn {
+  @apply flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-full text-xs sm:text-sm text-[hsl(var(--muted-foreground))] transition-colors duration-200;
+}
+
+.tweet-action-btn:hover {
+  @apply bg-[hsl(var(--secondary))] text-[hsl(var(--primary))];
+}
+
+.tweet-action-btn.like:hover {
+  @apply bg-[rgba(224,36,94,0.1)] text-[rgb(224,36,94)];
+}
+
+.tweet-action-btn.repost:hover {
+  @apply bg-[rgba(23,191,99,0.1)] text-[rgb(23,191,99)];
+}
+
+.tweet-action-btn svg {
+  @apply w-3.5 h-3.5 sm:w-4 sm:h-4;
+}
+
+.tweet-action-count {
+  @apply text-xs sm:text-sm;
+}
+
+/* History section styling */
+.history-section {
+  @apply mt-2 sm:mt-3 md:mt-4 border border-[hsl(var(--border))] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground)/30%) hsl(var(--muted));
+}
+
+.history-section::-webkit-scrollbar {
+  @apply w-0.5 sm:w-1 md:w-1.5;
+}
+
+.history-section::-webkit-scrollbar-track {
+  @apply bg-[hsl(var(--muted))];
+}
+
+.history-section::-webkit-scrollbar-thumb {
+  @apply bg-[hsl(var(--muted-foreground)/30%)] rounded-full;
+}
+
+.history-header {
+  @apply flex justify-between items-center p-2.5 sm:p-3 md:p-4 border-b border-[hsl(var(--border))] sticky top-0 bg-[hsl(var(--card))] z-10;
+}
+
+.history-title {
+  @apply font-bold text-[hsl(var(--foreground))] flex items-center gap-1.5 sm:gap-2;
+}
+
+.history-controls {
+  @apply flex gap-1 sm:gap-1.5 md:gap-2;
+}
+
+.history-filter-button {
+  @apply px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-full border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors;
+}
+
+.history-search {
+  @apply relative min-w-[120px] sm:min-w-[160px] md:min-w-[200px];
+}
+
+.history-search input {
+  @apply w-full focus:outline-none focus:border-[hsl(var(--primary))] focus:ring-1 focus:ring-[hsl(var(--primary))];
+}
+
+.history-search svg {
+  @apply absolute left-2 sm:left-2.5 md:left-3 top-1/2 transform -translate-y-1/2 text-[hsl(var(--muted-foreground))];
+}
+
+.history-content {
+  @apply max-h-[300px] sm:max-h-[400px] md:max-h-[600px] overflow-y-auto mt-0.5 sm:mt-1 md:mt-2;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+}
+
+.history-timeline {
+  @apply divide-y divide-[hsl(var(--border))];
+}
+
+.history-month-section {
+  @apply py-2 sm:py-3 md:py-4;
+}
+
+.history-month-header {
+  @apply text-sm sm:text-base md:text-lg font-semibold px-2.5 sm:px-3 md:px-4 mb-2 sm:mb-3;
+}
+
+.tweet-date-group {
+  @apply text-xs sm:text-sm text-[hsl(var(--muted-foreground))] px-2.5 sm:px-3 md:px-4 mb-1.5 sm:mb-2;
+}
+
+.history-empty-state {
+  @apply text-center text-[hsl(var(--muted-foreground))] text-sm sm:text-base py-8 sm:py-12;
+}
+
+/* 骨架屏动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Tweet skeleton styles */
+.tweet-skeleton {
+  @apply p-2.5 sm:p-3 md:p-4 border-b border-[hsl(var(--border))];
+}
+
+.tweet-skeleton-animate {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground)/10%) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  will-change: background-position;
+  transform: translateZ(0);
+}
+
+.skeleton-header {
+  @apply flex items-start gap-2.5 sm:gap-3;
+}
+
+.skeleton-avatar {
+  @apply w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-[hsl(var(--muted))] flex-shrink-0;
+}
+
+.skeleton-user-info {
+  @apply flex-1;
+}
+
+.skeleton-fullname {
+  @apply h-3.5 sm:h-4 md:h-5 bg-[hsl(var(--muted))] rounded-full w-24 sm:w-28 md:w-32 mb-2;
+}
+
+.skeleton-content {
+  @apply h-2.5 sm:h-3 md:h-3.5 bg-[hsl(var(--muted))] rounded-full w-full max-w-[85%] mb-1.5;
+}
+
+.skeleton-content-2 {
+  @apply h-2.5 sm:h-3 md:h-3.5 bg-[hsl(var(--muted))] rounded-full w-full max-w-[65%];
+}
+
+/* 骨架屏加载状态组 */
+.skeleton-group {
+  @apply space-y-2.5 sm:space-y-3 md:space-y-4 animate-pulse;
+}
+
+/* 骨架屏加载状态容器 */
+.skeleton-container {
+  @apply relative overflow-hidden;
+}
+
+.skeleton-container::after {
+  content: "";
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-[hsl(var(--background)/10%)] to-transparent;
+  animation: shimmer 2s infinite;
+}
+
+/* 全局平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 优化滚动性能 */
+.history-content {
+  @apply max-h-[300px] sm:max-h-[400px] md:max-h-[600px] overflow-y-auto mt-0.5 sm:mt-1 md:mt-2;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+}
+
+/* 优化动画性能的通用类 */
+.optimize-animation {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 优化滚动容器的通用类 */
+.optimize-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+}
+
+/* 优化加载动画 */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  @apply h-3 w-3 sm:h-4 sm:w-4 rounded-full border-t-2 border-[hsl(var(--primary-foreground))];
+  animation: spin 0.8s linear infinite;
+  will-change: transform;
 }

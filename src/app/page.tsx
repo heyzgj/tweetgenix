@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Clock, User, ArrowRight, Heart, Repeat, MessageSquare, Share, Bookmark } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { X, Clock, User, ArrowRight, Heart, Repeat, Reply, Bookmark, Share, Check, Copy, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,12 +10,291 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// 定义 Tweet 类型
+// Define Tweet type
 interface Tweet {
   id: string;
   content: string;
   created_at: string;
 }
+
+// Tweet content with hover-to-copy functionality
+const TweetContent = ({ content }: { content: string }) => {
+  const [copied, setCopied] = useState(false);
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      
+      if (indicatorRef.current) {
+        indicatorRef.current.classList.add('copied');
+        indicatorRef.current.textContent = 'Copied!';
+      }
+      
+      setTimeout(() => {
+        setCopied(false);
+        if (indicatorRef.current) {
+          indicatorRef.current.classList.remove('copied');
+          indicatorRef.current.textContent = 'Click to copy';
+        }
+      }, 2000);
+      
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+  
+  return (
+    <div className="relative group">
+      <div 
+        className="text-[15px] leading-normal mt-1 cursor-pointer break-words"
+        onClick={handleCopy}
+      >
+        {content}
+      </div>
+      <div 
+        ref={indicatorRef} 
+        className={`absolute -right-1 -top-1 px-2 py-1 rounded-md text-xs bg-white shadow-sm border border-[#eff3f4] opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+          copied ? 'text-[#00ba7c]' : 'text-[#536471]'
+        }`}
+      >
+        {copied ? 'Copied!' : 'Click to copy'}
+      </div>
+    </div>
+  );
+};
+
+// Tweet component
+const TweetCard = ({ tweet }: { tweet: Tweet }) => {
+  // Date formatting function
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds}s`;
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)}m`;
+    } else if (diffInSeconds < 86400) {
+      return `${Math.floor(diffInSeconds / 3600)}h`;
+    } else if (diffInSeconds < 2592000) {
+      return `${Math.floor(diffInSeconds / 86400)}d`;
+    } else {
+      // Format as "Month Day" format
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+  };
+
+  return (
+    <div className="hover:bg-[#f7f9f9] transition-colors duration-200 px-4 py-3">
+      <div className="flex gap-3">
+        <div className="shrink-0">
+          <Avatar className="h-10 w-10 rounded-full">
+            <AvatarFallback className="bg-[#eff3f4] text-[#536471]">YN</AvatarFallback>
+          </Avatar>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="font-bold hover:underline cursor-pointer">Your Name</span>
+            <span className="text-[#536471]">@yourhandle</span>
+            <span className="text-[#536471]">·</span>
+            <span className="text-[#536471] hover:underline cursor-pointer">{formatDate(tweet.created_at)}</span>
+          </div>
+          <div className="mt-1 text-[15px] leading-normal">
+            {tweet.content}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Loading skeleton for tweets
+const TweetSkeleton = () => (
+  <div className="tweet-skeleton px-4 py-3 sm:px-5 sm:py-4 -mx-4 sm:-mx-5">
+    <div className="skeleton-container flex gap-3 sm:gap-4">
+      <div className="skeleton-avatar tweet-skeleton-animate h-9 w-9 sm:h-10 sm:w-10 rounded-full shrink-0"></div>
+      <div className="skeleton-user-info flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="skeleton-fullname tweet-skeleton-animate h-4 w-24 rounded-md"></div>
+          <div className="skeleton-username tweet-skeleton-animate h-4 w-20 rounded-md"></div>
+          <div className="skeleton-timestamp tweet-skeleton-animate h-4 w-12 rounded-md"></div>
+        </div>
+        <div className="mt-2 space-y-2">
+          <div className="skeleton-content tweet-skeleton-animate h-4 w-full rounded-md"></div>
+          <div className="skeleton-content tweet-skeleton-animate h-4 w-4/5 rounded-md"></div>
+        </div>
+        <div className="skeleton-actions flex justify-between mt-4 max-w-md">
+          <div className="skeleton-action tweet-skeleton-animate h-8 w-12 rounded-md"></div>
+          <div className="skeleton-action tweet-skeleton-animate h-8 w-12 rounded-md"></div>
+          <div className="skeleton-action tweet-skeleton-animate h-8 w-12 rounded-md"></div>
+          <div className="skeleton-action tweet-skeleton-animate h-8 w-12 rounded-md"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Enhanced History component with virtual scrolling
+const TweetHistory = ({ tweets = [], onLoadMore, isLoadingMore }: { 
+  tweets: Tweet[], 
+  onLoadMore: () => void,
+  isLoadingMore: boolean
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  
+  // Group tweets by month and day
+  const groupedTweets = useMemo(() => {
+    // First filter tweets if search term exists
+    let filteredTweets = tweets;
+    if (searchTerm.trim()) {
+      filteredTweets = tweets.filter(tweet => 
+        tweet.content.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Group by month
+    const byMonth: Record<string, { date: Date, tweets: Record<string, Tweet[]> }> = {};
+    
+    filteredTweets.forEach(tweet => {
+      const date = new Date(tweet.created_at);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      if (!byMonth[monthKey]) {
+        byMonth[monthKey] = { date: date, tweets: {} };
+      }
+      
+      if (!byMonth[monthKey].tweets[dayKey]) {
+        byMonth[monthKey].tweets[dayKey] = [];
+      }
+      
+      byMonth[monthKey].tweets[dayKey].push(tweet);
+    });
+    
+    // Sort months by date (newest first)
+    return Object.entries(byMonth)
+      .sort((a, b) => b[1].date.getTime() - a[1].date.getTime());
+  }, [tweets, searchTerm]);
+  
+  // Setup intersection observer for infinite loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+    
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [isLoadingMore, onLoadMore]);
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setIsSearching(e.target.value.trim() !== '');
+  };
+  
+  return (
+    <div className="history-section rounded-lg sm:rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))]">
+      <div className="history-header flex items-center justify-between p-3 sm:p-4 border-b border-[hsl(var(--border))]">
+        <h2 className="history-title flex items-center text-base sm:text-lg font-semibold">
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+          Tweet History
+        </h2>
+        <div className="history-controls flex items-center gap-2 sm:gap-3">
+          <div className="history-search relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-[hsl(var(--muted-foreground))]" />
+            <input 
+              type="text" 
+              placeholder="Search history" 
+              value={searchTerm}
+              onChange={handleSearch}
+              className="input-standard h-8 sm:h-9 rounded-full pl-8 sm:pl-9 pr-3 sm:pr-4 text-xs sm:text-sm w-36 sm:w-44"
+            />
+          </div>
+          <button className="btn-secondary h-8 sm:h-9 text-xs sm:text-sm px-3 sm:px-4 rounded-full">
+            Latest
+          </button>
+        </div>
+      </div>
+      
+      <div className="history-content divide-y divide-[hsl(var(--border))]">
+        {groupedTweets.length > 0 ? (
+          <>
+            {groupedTweets.map(([month, { tweets: dayTweets }]) => (
+              <div key={month} className="history-month-section">
+                <div className="history-month-header sticky top-0 z-10 bg-[hsl(var(--background))]/80 backdrop-blur-sm px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium">
+                  {month}
+                </div>
+                
+                {Object.entries(dayTweets).map(([day, dayTweetsList]) => (
+                  <div key={day} className="tweet-date-group">
+                    <div className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))]/30">
+                      {day}
+                    </div>
+                    {dayTweetsList.map(tweet => (
+                      <TweetCard key={tweet.id} tweet={tweet} />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+            
+            {/* Loading indicator and intersection observer target */}
+            <div ref={loaderRef} className="p-4 sm:p-5 text-center">
+              {isLoadingMore ? (
+                <div className="skeleton-group space-y-4">
+                  <TweetSkeleton />
+                  <TweetSkeleton />
+                  <TweetSkeleton />
+                </div>
+              ) : (
+                tweets.length > 0 && (
+                  <button 
+                    onClick={onLoadMore} 
+                    className="btn-ghost text-[hsl(var(--primary))] text-sm sm:text-base hover:underline"
+                  >
+                    Load more tweets
+                  </button>
+                )
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="history-empty-state flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center mb-4">
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-[hsl(var(--muted-foreground))]" />
+            </div>
+            <p className="text-base sm:text-lg font-medium mb-2">
+              {searchTerm ? 'No tweets match your search.' : 'No saved tweets yet.'}
+            </p>
+            <p className="text-sm text-[hsl(var(--muted-foreground))]">
+              {searchTerm ? 'Try different keywords.' : 'Generated tweets will appear here.'}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
   const [tweetIdea, setTweetIdea] = useState("");
@@ -159,247 +438,146 @@ export default function Home() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  // Generate random engagement numbers for UI display
+  const getRandomEngagement = () => {
+    return {
+      likes: Math.floor(Math.random() * 500),
+      replies: Math.floor(Math.random() * 50),
+      reposts: Math.floor(Math.random() * 100),
+      views: Math.floor(Math.random() * 10000),
+    };
+  };
+
+  // For generated tweet preview
+  const previewTweet: Tweet = {
+    id: 'preview',
+    content: generatedTweet,
+    created_at: new Date().toISOString()
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header with login */}
-      <header className="sticky top-0 z-10 border-b border-neutral-800 flex justify-between items-center px-4 py-3 bg-black/80 backdrop-blur">
-        <div className="flex items-center">
-          <X className="h-6 w-6 text-white" />
-          <span className="ml-2 font-bold">TweetGenix</span>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-[#eff3f4] bg-white/80 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <X className="h-5 w-5" />
+            <span className="font-bold">TweetGenix</span>
+          </div>
+          <button className="inline-flex items-center gap-2 rounded-full bg-[#0f1419] px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#272c30]">
+            <User className="h-4 w-4" />
+            <span className="hidden sm:inline">Login</span>
+            <span className="sm:hidden">Log in</span>
+          </button>
         </div>
-        <Button variant="default" size="sm" className="rounded-full bg-white text-black hover:bg-white/90 font-bold">
-          <User className="h-4 w-4 mr-2" />
-          Login
-        </Button>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-16 px-4 max-w-3xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-4">Generate <span className="text-blue-400">Engaging Posts</span> in Seconds</h1>
-        <p className="text-neutral-400 text-lg mb-8">Leverage AI to create content that resonates with your audience</p>
-      </section>
+      {/* Main */}
+      <main className="mx-auto max-w-screen-xl px-4 py-12">
+        <div className="mx-auto max-w-2xl space-y-8">
+          {/* Hero */}
+          <div className="text-center">
+            <h1 className="text-[2rem] font-bold tracking-tight">
+              Generate Engaging Tweets in Seconds
+            </h1>
+            <p className="mt-3 text-[#536471]">
+              Leverage AI to create content that resonates with your audience
+            </p>
+          </div>
 
-      {/* Tweet Generation Section */}
-      <section className="px-4 py-8 max-w-xl mx-auto">
-        <Card className="mb-8 border-0 bg-black rounded-xl shadow-none">
-          <CardHeader className="pb-2">
-            <h3 className="font-bold text-xl">Create Your Post</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-neutral-300">Your post idea</label>
-                <Textarea 
-                  placeholder="What do you want to post about?"
-                  value={tweetIdea}
-                  onChange={(e) => setTweetIdea(e.target.value)}
-                  rows={3}
-                  className="resize-none bg-black border-neutral-800 focus:border-neutral-700 rounded-xl placeholder:text-neutral-600"
-                />
-              </div>
+          {/* Form Card */}
+          <div className="rounded-2xl border border-[#eff3f4] bg-white p-6 space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Your tweet idea</label>
+              <Textarea 
+                placeholder="What do you want to tweet about?"
+                value={tweetIdea}
+                onChange={(e) => setTweetIdea(e.target.value)}
+                rows={3}
+                className="min-h-[80px] resize-none rounded-xl border-0 bg-[#f7f9f9] px-4 py-3 text-base placeholder:text-[#536471] focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2 text-neutral-300">Reference post (optional)</label>
-                <Textarea 
-                  placeholder="Paste a post you like as reference"
-                  value={referenceTweet}
-                  onChange={(e) => setReferenceTweet(e.target.value)}
-                  rows={2}
-                  className="resize-none bg-black border-neutral-800 focus:border-neutral-700 rounded-xl placeholder:text-neutral-600"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2 text-neutral-300">Post length</label>
-                <Tabs defaultValue="short" value={length} onValueChange={setLength} className="w-full">
-                  <TabsList className="grid grid-cols-3 mb-2 bg-neutral-900 p-1 rounded-full">
-                    <TabsTrigger value="short" className="font-medium rounded-full data-[state=active]:bg-neutral-800">Short</TabsTrigger>
-                    <TabsTrigger value="medium" className="font-medium rounded-full data-[state=active]:bg-neutral-800">Medium</TabsTrigger>
-                    <TabsTrigger value="long" className="font-medium rounded-full data-[state=active]:bg-neutral-800">Long</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Reference tweet (optional)</label>
+              <Textarea 
+                placeholder="Paste a tweet you like as reference"
+                value={referenceTweet}
+                onChange={(e) => setReferenceTweet(e.target.value)}
+                rows={2}
+                className="min-h-[64px] resize-none rounded-xl border-0 bg-[#f7f9f9] px-4 py-3 text-base placeholder:text-[#536471] focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tweet length</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button 
+                  onClick={() => setLength('short')}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                    length === 'short' 
+                      ? 'bg-[#0f1419] text-white' 
+                      : 'bg-[#f7f9f9] hover:bg-[#eff3f4]'
+                  }`}
+                >
+                  Short
+                </button>
+                <button 
+                  onClick={() => setLength('medium')}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                    length === 'medium'
+                      ? 'bg-[#0f1419] text-white'
+                      : 'bg-[#f7f9f9] hover:bg-[#eff3f4]'
+                  }`}
+                >
+                  Medium
+                </button>
+                <button 
+                  onClick={() => setLength('long')}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                    length === 'long'
+                      ? 'bg-[#0f1419] text-white'
+                      : 'bg-[#f7f9f9] hover:bg-[#eff3f4]'
+                  }`}
+                >
+                  Long
+                </button>
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="pt-4">
-            <Button 
-              className="w-full rounded-full bg-white text-black hover:bg-white/90 font-bold text-md py-5"
+
+            <button 
               onClick={handleGenerate}
               disabled={isStreaming || tweetIdea.trim() === ""}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0f1419] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#272c30] disabled:opacity-50"
             >
               {isStreaming ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-black border-t-transparent rounded-full"></div>
+                <div className="flex items-center gap-2">
+                  <div className="loading-spinner"></div>
                   Generating...
                 </div>
               ) : (
                 <>
-                  Generate Post <ArrowRight className="ml-2 h-4 w-4" />
+                  Generate Tweet
+                  <ArrowRight className="h-4 w-4 optimize-animation" />
                 </>
               )}
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Generated Tweet Preview */}
-        {generatedTweet && (
-          <div className="mb-12">
-            <h3 className="font-bold text-xl mb-4">Your Generated Post</h3>
-            <div className="border border-neutral-800 rounded-xl overflow-hidden">
-              <div className="p-4">
-                <div className="flex">
-                  <Avatar className="h-10 w-10 mr-3 rounded-full">
-                    <AvatarFallback className="bg-neutral-800 text-white font-bold">YN</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="font-bold text-white flex items-center">
-                          Your Name
-                          <div className="ml-0.5 text-neutral-400">
-                            <span className="mx-1">·</span>
-                          </div>
-                          <span className="text-neutral-500 font-normal text-sm">
-                            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                        </div>
-                        <div className="text-neutral-500 text-sm">@yourhandle</div>
-                      </div>
-                      <button 
-                        onClick={handleCopy}
-                        className="text-neutral-500 hover:text-blue-400 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          {isCopied ? (
-                            <>
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </>
-                          ) : (
-                            <>
-                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </>
-                          )}
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="mt-2 mb-3 text-white whitespace-pre-wrap">{generatedTweet}</div>
-                    <div className="flex justify-between text-neutral-500 mt-4">
-                      <button className="flex items-center hover:text-blue-400 transition">
-                        <MessageSquare className="h-4 w-4 mr-1" />
-                        <span className="text-xs">0</span>
-                      </button>
-                      <button className="flex items-center hover:text-green-400 transition">
-                        <Repeat className="h-4 w-4 mr-1" />
-                        <span className="text-xs">0</span>
-                      </button>
-                      <button className="flex items-center hover:text-pink-600 transition">
-                        <Heart className="h-4 w-4 mr-1" />
-                        <span className="text-xs">0</span>
-                      </button>
-                      <button className="flex items-center hover:text-blue-400 transition">
-                        <Bookmark className="h-4 w-4 mr-1" />
-                      </button>
-                      <button className="flex items-center hover:text-blue-400 transition">
-                        <Share className="h-4 w-4 mr-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </button>
           </div>
-        )}
-      </section>
 
-      {/* History Section */}
-      <section className="px-4 py-8 max-w-xl mx-auto border-t border-neutral-800">
-        <div className="flex items-center mb-6">
-          <Clock className="mr-2 h-5 w-5 text-blue-400" />
-          <h2 className="text-xl font-bold">Generation History</h2>
-          <Badge className="ml-2 bg-blue-900/30 text-blue-400 border-0">
-            {savedTweets.length}
-          </Badge>
+          {/* History Section */}
+          <TweetHistory 
+            tweets={savedTweets} 
+            onLoadMore={loadMoreTweets} 
+            isLoadingMore={isLoadingMore}
+          />
         </div>
-        
-        <div className="space-y-4">
-          {savedTweets.map((tweet, index) => (
-            <div 
-              key={tweet.id} 
-              className="border border-neutral-800 rounded-xl overflow-hidden hover:bg-neutral-900/30 transition"
-              ref={index === savedTweets.length - 1 ? lastTweetElementRef : null}
-            >
-              <div className="p-4">
-                <div className="flex">
-                  <Avatar className="h-8 w-8 mr-3 rounded-full">
-                    <AvatarFallback className="bg-neutral-800 text-white font-bold text-sm">YN</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="font-bold text-white flex items-center text-sm">
-                          Your Name
-                          <div className="ml-0.5 text-neutral-400">
-                            <span className="mx-1">·</span>
-                          </div>
-                          <span className="text-neutral-500 font-normal text-xs">
-                            {new Date(tweet.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                        </div>
-                        <div className="text-neutral-500 text-xs">@yourhandle</div>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          navigator.clipboard.writeText(tweet.content);
-                        }}
-                        className="text-neutral-500 hover:text-blue-400 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="mt-1 mb-2 text-white text-sm whitespace-pre-wrap">{tweet.content}</div>
-                    <div className="flex justify-between text-neutral-500 mt-3">
-                      <button className="flex items-center hover:text-blue-400 transition">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                      </button>
-                      <button className="flex items-center hover:text-green-400 transition">
-                        <Repeat className="h-3 w-3 mr-1" />
-                      </button>
-                      <button className="flex items-center hover:text-pink-600 transition">
-                        <Heart className="h-3 w-3 mr-1" />
-                      </button>
-                      <button className="flex items-center hover:text-blue-400 transition">
-                        <Bookmark className="h-3 w-3 mr-1" />
-                      </button>
-                      <button className="flex items-center hover:text-blue-400 transition">
-                        <Share className="h-3 w-3 mr-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-          {isLoadingMore && (
-            <div className="text-center py-4">
-              <div className="animate-spin mx-auto h-6 w-6 border-2 border-neutral-600 border-t-blue-400 rounded-full"></div>
-              <p className="text-neutral-400 mt-2 text-sm">Loading more posts...</p>
-            </div>
-          )}
-        </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-800 p-6 text-center text-neutral-500 text-sm bg-black">
-        <div className="max-w-lg mx-auto">
-          <div className="flex justify-center mb-3">
-            <X className="h-5 w-5" />
-          </div>
-          <p>© {new Date().getFullYear()} TweetGenix. All rights reserved.</p>
-        </div>
+      <footer className="border-t border-[#eff3f4] py-6 text-center">
+        <p className="text-sm text-[#536471]">
+          © {new Date().getFullYear()} TweetGenix. All rights reserved.
+        </p>
       </footer>
     </div>
   );
