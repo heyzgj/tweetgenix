@@ -60,18 +60,14 @@ TweetGenix 使用 Tailwind CSS v4 作为主要样式解决方案，结合以下�
 
 ```css
 /* 色彩系统 */
---primary: 204 88% 53%;    /* X蓝色 #1d9bf0 */
---secondary: 204 88% 96%;  /* 淡蓝色 hover状态 */
---foreground: 200 15% 15%; /* 主文本颜色 */
---muted: 220 14% 96%;      /* 次要背景 */
---muted-foreground: 220 8% 46%; /* 次要文本 */
---accent: 24 100% 50%;     /* 强调色，通知/提醒 */
-
-/* 间距系统 */
-/* 遵循 Tailwind 的间距比例 */
-
-/* 字体系统 */
-font-family: 'Chirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', ...
+--background: oklch(100% 0 0);        /* 页面背景色 */
+--foreground: oklch(15% 0 0);          /* 主要文本颜色 */
+--primary: oklch(15% 0 0);             /* 主要颜色 */
+--primary-hover: oklch(15% 0 0 / 0.8); /* 深蓝色，用于悬停 */
+--muted: oklch(97% 0 0);               /* 减弱的背景色 */
+--muted-foreground: oklch(45% 0 0);   /* 减弱的文本颜色 */
+--border: oklch(95% 0 0);              /* 边框颜色 */
+--success: oklch(60% 0.15 150);        /* 成功状态颜色 */
 ```
 
 ### 3.3 组件样式指南
@@ -80,12 +76,12 @@ font-family: 'Chirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', ...
 
 ```tsx
 // 主按钮
-<button className="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-medium rounded-full px-4 py-2 transition-colors">
+<button className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary-hover))] text-white font-medium rounded-full px-4 py-2 transition-colors">
   生成推文
 </button>
 
 // 次要按钮
-<button className="text-[#1d9bf0] hover:bg-[#e8f5fd] font-medium rounded-full px-4 py-2 transition-colors">
+<button className="text-[hsl(var(--primary))] hover:bg-[hsl(var(--secondary))] font-medium rounded-full px-4 py-2 transition-colors">
   加载更多
 </button>
 ```
@@ -95,7 +91,7 @@ font-family: 'Chirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', ...
 ```tsx
 <div className="relative">
   <input 
-    className="w-full border border-[#eff3f4] rounded-md py-2 px-4 focus:outline-none focus:border-[#1d9bf0]"
+    className="input-standard"
     placeholder="输入提示..."
   />
 </div>
@@ -104,7 +100,7 @@ font-family: 'Chirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', ...
 #### 卡片
 
 ```tsx
-<div className="tweet-card border-b border-[#eff3f4] p-4 hover:bg-[#f7f9f9] transition-colors">
+<div className="tweet-card border-b border-[hsl(var(--border))] p-4 hover:bg-[hsl(var(--muted))] transition-colors">
   {/* 卡片内容 */}
 </div>
 ```

@@ -2,13 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { X, Clock, User, ArrowRight, Heart, Repeat, Reply, Bookmark, Share, Check, Copy, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Define Tweet type
 interface Tweet {
@@ -91,23 +86,21 @@ const TweetCard = ({ tweet }: { tweet: Tweet }) => {
   };
 
   return (
-    <div className="hover:bg-[#f7f9f9] transition-colors duration-200 px-4 py-3">
+    <div className="hover:bg-muted transition-colors duration-200 px-4 py-3">
       <div className="flex gap-3">
         <div className="shrink-0">
           <Avatar className="h-10 w-10 rounded-full">
-            <AvatarFallback className="bg-[#eff3f4] text-[#536471]">YN</AvatarFallback>
+            <AvatarFallback className="bg-muted text-muted-foreground">YN</AvatarFallback>
           </Avatar>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1">
             <span className="font-bold hover:underline cursor-pointer">Your Name</span>
-            <span className="text-[#536471]">@yourhandle</span>
-            <span className="text-[#536471]">·</span>
-            <span className="text-[#536471] hover:underline cursor-pointer">{formatDate(tweet.created_at)}</span>
+            <span className="text-muted-foreground">@yourhandle</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-muted-foreground hover:underline cursor-pointer">{formatDate(tweet.created_at)}</span>
           </div>
-          <div className="mt-1 text-[15px] leading-normal">
-            {tweet.content}
-          </div>
+          <TweetContent content={tweet.content} />
         </div>
       </div>
     </div>
@@ -213,15 +206,15 @@ const TweetHistory = ({ tweets = [], onLoadMore, isLoadingMore }: {
   };
   
   return (
-    <div className="history-section rounded-lg sm:rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))]">
-      <div className="history-header flex items-center justify-between p-3 sm:p-4 border-b border-[hsl(var(--border))]">
+    <div className="history-section rounded-lg sm:rounded-xl border border-border bg-background">
+      <div className="history-header flex items-center justify-between p-3 sm:p-4 border-b border-border">
         <h2 className="history-title flex items-center text-base sm:text-lg font-semibold">
           <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           Tweet History
         </h2>
-        <div className="history-controls flex items-center gap-2 sm:gap-3">
+        <div className="history-controls">
           <div className="history-search relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-[hsl(var(--muted-foreground))]" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
             <input 
               type="text" 
               placeholder="Search history" 
@@ -230,24 +223,21 @@ const TweetHistory = ({ tweets = [], onLoadMore, isLoadingMore }: {
               className="input-standard h-8 sm:h-9 rounded-full pl-8 sm:pl-9 pr-3 sm:pr-4 text-xs sm:text-sm w-36 sm:w-44"
             />
           </div>
-          <button className="btn-secondary h-8 sm:h-9 text-xs sm:text-sm px-3 sm:px-4 rounded-full">
-            Latest
-          </button>
         </div>
       </div>
       
-      <div className="history-content divide-y divide-[hsl(var(--border))]">
+      <div className="history-content divide-y divide-border">
         {groupedTweets.length > 0 ? (
           <>
             {groupedTweets.map(([month, { tweets: dayTweets }]) => (
               <div key={month} className="history-month-section">
-                <div className="history-month-header sticky top-0 z-10 bg-[hsl(var(--background))]/80 backdrop-blur-sm px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium">
+                <div className="history-month-header sticky top-0 z-10 bg-background/80 backdrop-blur-sm px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium">
                   {month}
                 </div>
                 
                 {Object.entries(dayTweets).map(([day, dayTweetsList]) => (
                   <div key={day} className="tweet-date-group">
-                    <div className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))]/30">
+                    <div className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm text-muted-foreground bg-muted/30">
                       {day}
                     </div>
                     {dayTweetsList.map(tweet => (
@@ -270,7 +260,7 @@ const TweetHistory = ({ tweets = [], onLoadMore, isLoadingMore }: {
                 tweets.length > 0 && (
                   <button 
                     onClick={onLoadMore} 
-                    className="btn-ghost text-[hsl(var(--primary))] text-sm sm:text-base hover:underline"
+                    className="text-primary text-sm sm:text-base hover:underline"
                   >
                     Load more tweets
                   </button>
@@ -280,13 +270,13 @@ const TweetHistory = ({ tweets = [], onLoadMore, isLoadingMore }: {
           </>
         ) : (
           <div className="history-empty-state flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center mb-4">
-              <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-[hsl(var(--muted-foreground))]" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
             </div>
             <p className="text-base sm:text-lg font-medium mb-2">
               {searchTerm ? 'No tweets match your search.' : 'No saved tweets yet.'}
             </p>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            <p className="text-sm text-muted-foreground">
               {searchTerm ? 'Try different keywords.' : 'Generated tweets will appear here.'}
             </p>
           </div>

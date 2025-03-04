@@ -6,13 +6,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        xBlue: '#1d9bf0',
-        xBackground: '#ffffff',
-        xText: '#0f1419',
-        xSecondary: '#536471',
-        xBorder: '#eff3f4',
-        xGreen: '#00ba7c',
-        xRed: '#f91880',
+        background: 'oklch(100% 0 0)',
+        foreground: 'oklch(15% 0 0)',
+        border: 'oklch(95% 0 0)',
+        muted: 'oklch(97% 0 0)',
+        'muted-foreground': 'oklch(45% 0 0)',
+        primary: 'oklch(15% 0 0)',
+        'primary-foreground': 'oklch(100% 0 0)',
+        success: 'oklch(60% 0.15 150)',
       },
       fontFamily: {
         sans: ['Chirp', 'sans-serif'],
